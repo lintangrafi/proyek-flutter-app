@@ -4,6 +4,7 @@ import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
 import 'create_po_screen.dart';
 import 'purchase_order_list_screen.dart';
+import 'po_detail_screen.dart';
 
 String shortDate(String d) => d.length > 10 ? d.substring(0, 10) : d;
 
@@ -195,10 +196,10 @@ class _POListCard extends StatelessWidget {
           ),
         ),
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Tap pada PO List Item: ${po.poNumber}"),
-              behavior: SnackBarBehavior.floating,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PODetailScreen(poId: po.id.toString()),
             ),
           );
         },
@@ -365,6 +366,12 @@ class _HomeScreenState extends State<HomeScreen>
                                 builder: (_) => const CreatePOScreen(),
                               ),
                             ),
+                      ),
+                      _QuickActionButton(
+                        icon: Icons.inventory_2_outlined,
+                        label: "Goods Receipt",
+                        color: Colors.indigo,
+                        onTap: () => Navigator.pushNamed(context, '/create-gr'),
                       ),
                       _QuickActionButton(
                         icon: Icons.assessment_outlined,

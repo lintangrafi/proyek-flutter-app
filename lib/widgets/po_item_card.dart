@@ -32,7 +32,7 @@ class POItemCard extends StatelessWidget {
               Text('Vendor: ${po.vendorName}'),
               Text('Date: ${po.date}'),
               Text(
-                'Total: Rp ${po.total.toStringAsFixed(2)}',
+                'Total: Rp ${po.total.toStringAsFixed(0).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ".")}',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],

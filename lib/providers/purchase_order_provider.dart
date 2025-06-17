@@ -34,6 +34,10 @@ class PurchaseOrderProvider with ChangeNotifier {
     return false;
   }
 
+  Future<void> approveOrder(int id) async {
+    await updateOrderStatus(id, 'Approved');
+  }
+
   PurchaseOrder getOrderById(int id) {
     return _orders.firstWhere(
       (po) => po.id == id,

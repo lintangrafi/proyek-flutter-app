@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
+import 'po_detail_screen.dart';
 
 String shortDate(String d) => d.length > 10 ? d.substring(0, 10) : d;
 
@@ -130,10 +131,10 @@ class _POListCardItem extends StatelessWidget {
           ),
         ),
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Tap pada PO List Item: ${po.poNumber}"),
-              behavior: SnackBarBehavior.floating,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PODetailScreen(poId: po.id.toString()),
             ),
           );
         },

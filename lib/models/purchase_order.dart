@@ -10,6 +10,7 @@ class PurchaseOrder {
   final String status;
   final List<PurchaseOrderItem> items;
   final int createdBy;
+  final int warehouseId;
 
   PurchaseOrder({
     required this.id,
@@ -21,6 +22,7 @@ class PurchaseOrder {
     required this.status,
     required this.items,
     required this.createdBy,
+    required this.warehouseId,
   });
 
   factory PurchaseOrder.fromJson(Map<String, dynamic> json) {
@@ -54,6 +56,11 @@ class PurchaseOrder {
           ((json['items'] as List<dynamic>?) ?? [])
               .map((item) => PurchaseOrderItem.fromJson(item))
               .toList(), // Ensure items are properly parsed
+      warehouseId:
+          json['warehouse_id'] is String
+              ? int.parse(json['warehouse_id'])
+              : json['warehouse_id'] ??
+                  0, // Ensure warehouseId is parsed correctly
     );
   }
 
@@ -67,6 +74,7 @@ class PurchaseOrder {
       'total': total,
       'status': status,
       'created_by': createdBy,
+      'warehouse_id': warehouseId,
       'items': items.map((i) => i.toJson()).toList(),
     };
   }
@@ -81,6 +89,7 @@ class PurchaseOrder {
     String? status,
     List<PurchaseOrderItem>? items,
     int? createdBy,
+    int? warehouseId,
   }) {
     return PurchaseOrder(
       id: id ?? this.id,
@@ -92,6 +101,7 @@ class PurchaseOrder {
       status: status ?? this.status,
       items: items ?? this.items,
       createdBy: createdBy ?? this.createdBy,
+      warehouseId: warehouseId ?? this.warehouseId,
     );
   }
 }

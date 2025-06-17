@@ -28,6 +28,7 @@ class AuthProvider with ChangeNotifier {
     final savedUserId = prefs.getInt('userId');
     final savedUserName = prefs.getString('userName');
     final savedUserEmail = prefs.getString('userEmail');
+    final savedUserRole = prefs.getString('userRole');
 
     // Jika data login tersedia, coba memulihkan sesi
     if (savedToken != null && savedBaseUrl != null) {
@@ -41,6 +42,7 @@ class AuthProvider with ChangeNotifier {
           id: savedUserId,
           name: savedUserName ?? 'User',
           email: savedUserEmail,
+          role: savedUserRole,
         );
       }
 
@@ -80,6 +82,7 @@ class AuthProvider with ChangeNotifier {
               id: 1, // ID default
               name: 'User',
               email: email,
+              role: null,
             );
           }
         }
@@ -111,6 +114,9 @@ class AuthProvider with ChangeNotifier {
       await prefs.setInt('userId', _currentUser!.id);
       await prefs.setString('userName', _currentUser!.name);
       await prefs.setString('userEmail', _currentUser!.email);
+      if (_currentUser!.role != null) {
+        await prefs.setString('userRole', _currentUser!.role!);
+      }
     }
   }
 

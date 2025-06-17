@@ -8,6 +8,7 @@ import '../providers/purchase_order_provider.dart';
 import '../providers/vendor_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/auth_provider.dart'; // Tambahkan import ini
+import '../providers/warehouse_provider.dart';
 
 class CreatePOScreen extends StatefulWidget {
   const CreatePOScreen({super.key});
@@ -19,6 +20,7 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _generatedPoNumber;
   int? _selectedVendorId;
+  int? _selectedWarehouseId;
   DateTime? _selectedDate;
   final List<PurchaseOrderItem> _items = [];
   final TextEditingController _dateController = TextEditingController();
@@ -30,6 +32,7 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VendorProvider>().loadVendors();
+      context.read<WarehouseProvider>().loadWarehouses();
     });
   }
 
@@ -67,8 +70,9 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
       setState(() {
         _selectedDate = picked;
         _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        _generatedPoNumber = null;
+        _poNumberController.clear();
       });
-      _generatePoNumber(picked);
     }
   }
 
@@ -185,7 +189,11 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                             selectedProduct = value;
                             if (selectedProduct != null) {
                               priceController.text = selectedProduct!.price
-                                  .toStringAsFixed(2);
+                                  .toStringAsFixed(0)
+                                  .replaceAllMapped(
+                                    RegExp(r'\B(?=(\d{3})+(?!\d))'),
+                                    (match) => ".",
+                                  );
                             } else {
                               priceController.clear();
                             }
@@ -208,10 +216,27 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                           quantity = int.tryParse(val) ?? 1;
                         },
                       ),
+                      // Tambahkan info unit di bawah kuantitas
+                      if (selectedProduct != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 4,
+                            left: 4,
+                            bottom: 8,
+                          ),
+                          child: Text(
+                            'Unit:  ${selectedProduct!.unit}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 12),
                       TextField(
                         decoration: const InputDecoration(labelText: 'Harga'),
                         controller: priceController,
+                        readOnly: true,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -307,12 +332,20 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
       ).showSnackBar(const SnackBar(content: Text('Vendor harus dipilih.')));
       return;
     }
+    if (_selectedWarehouseId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lokasi gudang harus dipilih.')),
+      );
+      return;
+    }
     if (_items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tambahkan minimal satu item ke PO.')),
       );
       return;
     }
+    // Generate kode PO di sini
+    _generatePoNumber(_selectedDate!);
     if (_generatedPoNumber == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -369,17 +402,18 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
         total: total,
         status: 'Menunggu Persetujuan',
         items: List.from(_items),
-        createdBy: authProvider.userId!, // <--- INI YANG PENTING!
+        createdBy: authProvider.userId!,
+        warehouseId: _selectedWarehouseId ?? 0, // pastikan int, bukan int?
       );
-
       final poProvider = context.read<PurchaseOrderProvider>();
       await poProvider.addOrder(newPO);
-
       if (!mounted) return;
       Navigator.pop(context);
-
+      // Tampilkan kode PO setelah berhasil simpan
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('PO ${newPO.poNumber} berhasil disimpan.')),
+        SnackBar(
+          content: Text('PO berhasil disimpan. Kode PO: ${newPO.poNumber}'),
+        ),
       );
       await context.read<PurchaseOrderProvider>().loadPurchaseOrders();
       if (!mounted) return;
@@ -401,12 +435,24 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
     super.dispose();
   }
 
+  String formatRupiah(num number) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp. ',
+      decimalDigits: 0,
+    );
+    return formatter.format(number);
+  }
+
   @override
   Widget build(BuildContext context) {
     final vendorProvider = context.watch<VendorProvider>();
+    final warehouseProvider = context.watch<WarehouseProvider>();
     final bool canEditVendor = _items.isEmpty;
     final bool canEditDate = _items.isEmpty;
+    final bool canEditWarehouse = _items.isEmpty;
     final vendors = vendorProvider.vendors;
+    final warehouses = warehouseProvider.warehouses;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Buat Purchase Order')),
@@ -434,13 +480,40 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Nomor PO (Otomatis)',
-                ),
-                readOnly: true,
-                controller: _poNumberController,
-              ),
+              // Ganti field Nomor PO dengan Lokasi Gudang
+              warehouses.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : DropdownButtonFormField<int>(
+                    value: _selectedWarehouseId,
+                    decoration: const InputDecoration(
+                      labelText: 'Lokasi Gudang',
+                    ),
+                    onChanged:
+                        canEditWarehouse
+                            ? (value) {
+                              setState(() {
+                                _selectedWarehouseId = value;
+                              });
+                            }
+                            : null,
+                    items:
+                        warehouses
+                            .map(
+                              (w) => DropdownMenuItem<int>(
+                                value: w.id,
+                                child: Text(w.name),
+                              ),
+                            )
+                            .toList(),
+                    validator:
+                        (value) =>
+                            value == null
+                                ? 'Lokasi gudang harus dipilih'
+                                : null,
+                    style: TextStyle(
+                      color: canEditWarehouse ? Colors.black : Colors.grey,
+                    ),
+                  ),
               const SizedBox(height: 16),
               vendors.isEmpty
                   ? const Center(child: CircularProgressIndicator())
@@ -500,18 +573,48 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                     ),
                     const SizedBox(height: 8),
                     ..._items.map(
-                      (item) => ListTile(
-                        title: Text(item.name),
-                        subtitle: Text(
-                          'Harga: ${item.price}, Qty: ${item.quantity}, Unit: ${item.unit}',
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _items.remove(item);
-                            });
-                          },
+                      (item) => Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          title: Text(
+                            item.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Harga: ${formatRupiah(item.price)} / ${item.unit}',
+                                style: const TextStyle(color: Colors.black87),
+                              ),
+                              Text(
+                                'Qty: ${item.quantity} ${item.unit}',
+                                style: const TextStyle(color: Colors.black87),
+                              ),
+                              Text(
+                                'Subtotal: ${formatRupiah(item.price * item.quantity)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,
+                                ),
+                              ),
+                              if (item is PurchaseOrderItem &&
+                                  item is dynamic &&
+                                  item.toJson().containsKey('description') &&
+                                  (item as dynamic).description != null)
+                                Text(
+                                  'Deskripsi: ${(item as dynamic).description}',
+                                ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _items.remove(item);
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),

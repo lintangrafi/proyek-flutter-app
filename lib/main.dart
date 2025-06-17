@@ -5,14 +5,17 @@ import 'providers/purchase_order_provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/vendor_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/warehouse_provider.dart';
+import 'providers/goods_receipt_provider.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/create_gr_screen.dart';
 
 void main() {
   // Inisialisasi Flutter
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AuthProvider(),
@@ -42,6 +45,18 @@ class RootApp extends StatelessWidget {
               ),
               ChangeNotifierProvider(
                 create: (_) => PurchaseOrderProvider(apiService: apiService),
+              ),
+              ChangeNotifierProvider(
+                create:
+                    (_) => WarehouseProvider(
+                      apiService: apiService,
+                    ), // Perbaiki: inject apiService
+              ),
+              ChangeNotifierProvider(
+                create:
+                    (_) => GoodsReceiptProvider(
+                      apiService: apiService,
+                    ), // Tambahkan provider GR
               ),
             ],
             child: MaterialApp(
@@ -79,6 +94,9 @@ class RootApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               home: const HomeScreen(),
+              routes: {
+                '/create-gr': (context) => const CreateGoodsReceiptScreen(),
+              },
             ),
           );
         }

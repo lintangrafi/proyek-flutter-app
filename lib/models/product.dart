@@ -20,19 +20,20 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     // Pastikan mengonversi nilai ke tipe data yang benar
     final int id =
-        json['id'] is String ? int.parse(json['id']) : json['id'] as int;
+        json['id'] != null ? int.tryParse(json['id'].toString()) ?? 0 : 0;
 
-    // Parse vendor_id dengan benar (pastikan tidak null dan dikonversi ke int)
-    final dynamic rawVendorId = json['vendor_id'];
+    // Parse vendor_id dengan aman (jika null, fallback ke 0)
     final int vendorId =
-        rawVendorId is String ? int.parse(rawVendorId) : rawVendorId as int;
+        json['vendor_id'] != null
+            ? int.tryParse(json['vendor_id'].toString()) ?? 0
+            : 0;
 
     // Parse price dengan benar (pastikan dikonversi ke double)
-    final dynamic rawPrice = json['price'];
     final double price =
-        rawPrice is String
-            ? double.parse(rawPrice.replaceAll(',', ''))
-            : (rawPrice is int ? rawPrice.toDouble() : rawPrice as double);
+        json['price'] != null
+            ? double.tryParse(json['price'].toString().replaceAll(',', '')) ??
+                0.0
+            : 0.0;
 
     return Product(
       id: id,
@@ -41,9 +42,9 @@ class Product {
       unit: json['unit'] as String,
       description: json['description'] as String?,
       stock:
-          json['stock'] is String
-              ? int.parse(json['stock'])
-              : (json['stock'] ?? 0) as int,
+          json['stock'] != null
+              ? int.tryParse(json['stock'].toString()) ?? 0
+              : 0,
       vendorId: vendorId,
     );
   }

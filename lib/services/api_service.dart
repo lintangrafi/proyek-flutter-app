@@ -4,6 +4,8 @@ import '../models/purchase_order.dart';
 import '../models/vendor.dart';
 import '../models/product.dart';
 import '../models/user.dart'; // Pastikan model User sudah dibuat
+import '../models/warehouse.dart'; // Pastikan model Warehouse sudah dibuat
+import '../models/goods_receipt.dart';
 
 class ApiService {
   String baseUrl = 'http://192.168.1.170:8000';
@@ -243,6 +245,45 @@ class ApiService {
     } catch (e) {
       print('Error dalam getProductsByVendor: $e');
       rethrow;
+    }
+  }
+
+  // Tambahkan ke ApiService
+  Future<List<Warehouse>> fetchWarehouses() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/warehouses'),
+      headers: _headers,
+    );
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => Warehouse.fromJson(e)).toList();
+    } else {
+      throw Exception('Gagal mengambil data Warehouse');
+    }
+  }
+
+  // === GOODS RECEIPT ===
+  Future<List<GoodsReceipt>> fetchGoodsReceipts() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/goods-receipts'),
+      headers: _headers,
+    );
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => GoodsReceipt.fromJson(e)).toList();
+    } else {
+      throw Exception('Gagal mengambil data Goods Receipt');
+    }
+  }
+
+  Future<void> createGoodsReceipt(GoodsReceipt gr) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/goods-receipts'),
+      headers: _headers,
+      body: jsonEncode(gr.toJson()),
+    );
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw Exception('Gagal membuat Goods Receipt: ${response.body}');
     }
   }
 }

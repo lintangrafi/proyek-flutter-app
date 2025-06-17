@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
+import '../providers/auth_provider.dart';
 
 class PODetailScreen extends StatefulWidget {
   final String poId;
@@ -80,9 +81,52 @@ class _PODetailScreenState extends State<PODetailScreen> {
                     title: Text(item.name),
                     subtitle: Text('${item.quantity} x ${item.unit}'),
                     trailing: Text(
-                      'Rp ${(item.price * item.quantity).toStringAsFixed(2)}',
+                      'Rp ${(item.price * item.quantity).toStringAsFixed(0).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ".")}',
                     ),
                   ),
+                ),
+                const SizedBox(height: 24),
+                // Tampilkan tombol Approve jika user manager dan status Draft
+                Builder(
+                  builder: (context) {
+                    final authProvider = Provider.of<AuthProvider>(
+                      context,
+                      listen: false,
+                    );
+                    final isManager =
+                        authProvider.currentUser?.role == 'manager';
+                    if (isManager && po.status == 'Draft') {
+                      return ElevatedButton.icon(
+                        icon: const Icon(Icons.check_circle_outline),
+                        label: const Text('Approve PO'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        onPressed: () async {
+                          try {
+                            await Provider.of<PurchaseOrderProvider>(
+                              context,
+                              listen: false,
+                            ).approveOrder(po.id);
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('PO berhasil di-approve.'),
+                              ),
+                            );
+                            setState(() {
+                              _poFuture = _loadPurchaseOrder();
+                            });
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Gagal approve PO: $e')),
+                            );
+                          }
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
               ],
             ),
