@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
 import '../providers/goods_receipt_provider.dart';
+import '../providers/invoice_provider.dart';
 import 'account_detail_screen.dart';
 import 'create_po_screen.dart';
 import 'purchase_order_list_screen.dart';
@@ -32,6 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         listen: false,
       ).loadGoodsReceipts();
+      Provider.of<InvoiceProvider>(
+        context,
+        listen: false,
+      ).loadInvoices();
       _didLoad = true;
     }
   }
@@ -40,8 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final poProvider = Provider.of<PurchaseOrderProvider>(context);
     final grProvider = Provider.of<GoodsReceiptProvider>(context);
+    final invoiceProvider = Provider.of<InvoiceProvider>(context);
     final allOrders = poProvider.orders;
     final allReceipts = grProvider.goodsReceipts;
+    final allInvoices = invoiceProvider.invoices;
 
     // PO stats
     final int draftCount =
@@ -72,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   g.status.toLowerCase() == "selesai",
             )
             .length;
-    // Invoice stats (dummy, bisa diupdate nanti)
-    final int invoiceDraft = 0;
-    final int invoicePaid = 0;
+    // Invoice stats
+    final int invoiceDraft = allInvoices.where((inv) => inv.status.toLowerCase() == 'draft').length;
+    final int invoicePaid = allInvoices.where((inv) => inv.status.toLowerCase() == 'paid').length;
 
     final Color primaryColor = const Color(0xFF1A4A8B);
     final Color accentColorGreen = Colors.green.shade700;

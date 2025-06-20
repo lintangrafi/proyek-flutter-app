@@ -305,6 +305,29 @@ class _PODetailScreenState extends State<PODetailScreen> {
                                 ),
                               ),
                               onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Konfirmasi Approve'),
+                                    content: const Text('Apakah Anda yakin ingin menyetujui PO ini?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx, false),
+                                        child: const Text('Batal'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(ctx, true),
+                                        child: const Text('Ya'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm != true) return;
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                                );
                                 try {
                                   await Provider.of<PurchaseOrderProvider>(
                                     context,
@@ -317,7 +340,14 @@ class _PODetailScreenState extends State<PODetailScreen> {
                                   setState(() {
                                     _poFuture = _loadPurchaseOrder();
                                   });
+                                  Navigator.pop(context); // close loading
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('PO berhasil di-approve.'),
+                                    ),
+                                  );
                                 } catch (e) {
+                                  Navigator.pop(context); // close loading
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text('Gagal approve PO: $e'),
