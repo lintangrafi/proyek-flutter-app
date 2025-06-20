@@ -17,7 +17,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   int? selectedGRId;
   String invoiceNumber = '';
   String date = '';
-  double total = 0;
+  num total = 0;
   bool isLoading = false;
   String? error;
 

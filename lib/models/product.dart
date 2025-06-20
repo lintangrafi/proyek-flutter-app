@@ -1,7 +1,7 @@
 class Product {
   final int id;
   final String name;
-  final double price;
+  final num price;
   final String unit;
   final String? description;
   final int stock;
@@ -29,11 +29,10 @@ class Product {
             : 0;
 
     // Parse price dengan benar (pastikan dikonversi ke double)
-    final double price =
+    final num price =
         json['price'] != null
-            ? double.tryParse(json['price'].toString().replaceAll(',', '')) ??
-                0.0
-            : 0.0;
+            ? num.tryParse(json['price'].toString().replaceAll(',', '')) ?? 0.0
+            : 0;
 
     return Product(
       id: id,

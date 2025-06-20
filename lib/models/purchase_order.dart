@@ -6,7 +6,7 @@ class PurchaseOrder {
   final int vendorId;
   final String vendorName;
   final String date;
-  final double total;
+  final num total;
   final String status;
   final List<PurchaseOrderItem> items;
   final int createdBy;
@@ -45,8 +45,8 @@ class PurchaseOrder {
           '', // Fallback to empty string if null
       date: json['date'] ?? '', // Fallback to empty string if null
       total:
-          double.tryParse(json['total'].toString()) ??
-          0.0, // Ensure total is a double, fallback if null or invalid
+          num.tryParse(json['total'].replaceAll('.', '').toString()) ??
+          0, // Ensure total is a double, fallback if null or invalid
       status: json['status'] ?? '', // Fallback to empty string if null
       createdBy:
           json['created_by'] is String
@@ -85,7 +85,7 @@ class PurchaseOrder {
     int? vendorId,
     String? vendorName,
     String? date,
-    double? total,
+    num? total,
     String? status,
     List<PurchaseOrderItem>? items,
     int? createdBy,

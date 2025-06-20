@@ -31,10 +31,12 @@ class _PODetailScreenState extends State<PODetailScreen> {
 
   Future<PurchaseOrder> _loadPurchaseOrder() async {
     try {
-      return Provider.of<PurchaseOrderProvider>(
+      final ordersId = Provider.of<PurchaseOrderProvider>(
         context,
         listen: false,
       ).getOrderById(int.parse(widget.poId));
+      print("OrderId ${ordersId.toJson()}");
+      return ordersId;
     } catch (e) {
       print('Error loading purchase order: $e');
       throw Exception('Failed to load purchase order');
@@ -52,6 +54,7 @@ class _PODetailScreenState extends State<PODetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('masuk ke FutureBuilder');
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Purchase Order')),
       body: FutureBuilder<PurchaseOrder>(
@@ -66,8 +69,9 @@ class _PODetailScreenState extends State<PODetailScreen> {
           if (snapshot.hasError || !snapshot.hasData) {
             return const Center(child: Text('Gagal memuat detail PO'));
           }
-
           final po = snapshot.data!;
+
+          print('po itemnya adalah ${po.toJson()}');
           final vendorProvider = Provider.of<VendorProvider>(
             context,
             listen: false,

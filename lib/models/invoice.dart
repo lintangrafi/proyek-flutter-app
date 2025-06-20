@@ -4,7 +4,7 @@ class Invoice {
   final int grId;
   final String grNumber;
   final String date;
-  final double total;
+  final num total;
   final String status;
 
   Invoice({
@@ -24,7 +24,7 @@ class Invoice {
       grId: json['gr_id'] ?? 0,
       grNumber: json['gr_number'] ?? '',
       date: json['date'] ?? '',
-      total: double.tryParse(json['total'].toString()) ?? 0.0,
+      total: num.tryParse(json['total'].toString()) ?? 0,
       status: json['status'] ?? '',
     );
   }

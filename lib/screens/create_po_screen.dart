@@ -270,7 +270,9 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                     );
                     return;
                   }
-                  final price = double.tryParse(priceController.text);
+                  final price = num.tryParse(
+                    priceController.text.replaceAll('.', ''),
+                  );
                   if (price == null || price <= 0) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       const SnackBar(content: Text('Harga tidak valid')),
@@ -387,8 +389,8 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
     try {
       final vendorProvider = context.read<VendorProvider>();
       final vendorName = vendorProvider.getById(_selectedVendorId!).name;
-      final total = _items.fold<double>(
-        0.0,
+      final num total = _items.fold(
+        0,
         (sum, item) => sum + (item.price * item.quantity),
       );
 

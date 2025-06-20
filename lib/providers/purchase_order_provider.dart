@@ -39,6 +39,7 @@ class PurchaseOrderProvider with ChangeNotifier {
   }
 
   PurchaseOrder getOrderById(int id) {
+    print('all orders ${orders.first.toJson()}');
     return _orders.firstWhere(
       (po) => po.id == id,
       orElse: () => throw Exception("PO tidak ditemukan"),

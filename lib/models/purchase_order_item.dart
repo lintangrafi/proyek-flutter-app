@@ -2,7 +2,7 @@ class PurchaseOrderItem {
   final int id;
   final int productId;
   final String name;
-  final double price;
+  final num price;
   final int quantity;
   final String unit;
 
@@ -28,8 +28,8 @@ class PurchaseOrderItem {
       name: json['name'] ?? '', // Jika null, set nama kosong
       // Menangani null pada harga
       price:
-          double.tryParse(json['price']?.toString() ?? '') ??
-          0.0, // Jika null atau tidak valid, set harga 0.0
+          num.tryParse(json['price']?.replaceAll('.', '').toString() ?? '') ??
+          0, // Jika null atau tidak valid, set harga 0.0
       // Menangani null pada kuantitas
       quantity:
           json['quantity'] is String
@@ -54,7 +54,7 @@ class PurchaseOrderItem {
     int? id,
     int? productId,
     String? name,
-    double? price,
+    num? price,
     int? quantity,
     String? unit,
   }) {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
 import '../providers/goods_receipt_provider.dart';
+import 'account_detail_screen.dart';
 import 'create_po_screen.dart';
 import 'purchase_order_list_screen.dart';
 import 'po_detail_screen.dart';
@@ -113,10 +114,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.white,
-                      child: Icon(
+                    IconButton(
+                      // radius: 24,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AccountDetailScreen(),
+                          ),
+                        );
+                      },
+                      color: Colors.white,
+                      icon: Icon(
                         Icons.person_outline_rounded,
                         color: primaryColor,
                         size: 30,

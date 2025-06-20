@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/invoice_provider.dart';
-import '../models/invoice.dart';
 import './create_invoice_screen.dart';
 import './invoice_detail_screen.dart';
 
