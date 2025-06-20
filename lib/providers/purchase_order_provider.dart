@@ -45,5 +45,9 @@ class PurchaseOrderProvider with ChangeNotifier {
     );
   }
 
+  Future<void> refreshOrders() async {
+    await loadPurchaseOrders();
+  }
+
   loadOrders() {}
 }

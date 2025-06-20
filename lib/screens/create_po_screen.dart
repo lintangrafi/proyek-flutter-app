@@ -333,14 +333,14 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
       return;
     }
     if (_selectedWarehouseId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lokasi gudang harus dipilih.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gudang harus dipilih.')));
       return;
     }
     if (_items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tambahkan minimal satu item ke PO.')),
+        const SnackBar(content: Text('Minimal 1 item harus ditambahkan.')),
       );
       return;
     }
@@ -485,9 +485,7 @@ class _CreatePOScreenState extends State<CreatePOScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : DropdownButtonFormField<int>(
                     value: _selectedWarehouseId,
-                    decoration: const InputDecoration(
-                      labelText: 'Lokasi Gudang',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Gudang'),
                     onChanged:
                         canEditWarehouse
                             ? (value) {

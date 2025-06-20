@@ -18,4 +18,12 @@ class GoodsReceiptProvider with ChangeNotifier {
     await apiService.createGoodsReceipt(gr);
     await loadGoodsReceipts();
   }
+
+  Future<bool> updateGoodsReceiptStatus(int id, String status) async {
+    final ok = await apiService.updateGoodsReceiptStatus(id, status);
+    if (ok) {
+      await loadGoodsReceipts();
+    }
+    return ok;
+  }
 }

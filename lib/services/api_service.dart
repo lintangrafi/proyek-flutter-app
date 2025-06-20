@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../models/user.dart'; // Pastikan model User sudah dibuat
 import '../models/warehouse.dart'; // Pastikan model Warehouse sudah dibuat
 import '../models/goods_receipt.dart';
+import '../models/invoice.dart'; // Pastikan model Invoice sudah dibuat
 
 class ApiService {
   String baseUrl = 'http://192.168.1.170:8000';
@@ -285,5 +286,48 @@ class ApiService {
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception('Gagal membuat Goods Receipt: ${response.body}');
     }
+  }
+
+  Future<bool> updateGoodsReceiptStatus(int id, String status) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/goods-receipts/$id/status'),
+      headers: _headers,
+      body: jsonEncode({'status': status}),
+    );
+    return response.statusCode == 200;
+  }
+
+  // === INVOICE ===
+  Future<List<Invoice>> fetchInvoices() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/invoices'),
+      headers: _headers,
+    );
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => Invoice.fromJson(e)).toList();
+    } else {
+      throw Exception('Gagal mengambil data Invoice');
+    }
+  }
+
+  Future<void> createInvoice(Invoice invoice) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/invoices'),
+      headers: _headers,
+      body: jsonEncode(invoice.toJson()),
+    );
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw Exception('Gagal membuat Invoice: ${response.body}');
+    }
+  }
+
+  Future<bool> updateInvoiceStatus(int id, String status) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/invoices/$id/status'),
+      headers: _headers,
+      body: jsonEncode({'status': status}),
+    );
+    return response.statusCode == 200;
   }
 }

@@ -7,10 +7,13 @@ import 'providers/vendor_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/warehouse_provider.dart';
 import 'providers/goods_receipt_provider.dart';
+import 'providers/invoice_provider.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_gr_screen.dart';
+import 'screens/goods_receipt_list_screen.dart';
+import 'screens/invoice_list_screen.dart';
 
 void main() {
   // Inisialisasi Flutter
@@ -58,6 +61,9 @@ class RootApp extends StatelessWidget {
                       apiService: apiService,
                     ), // Tambahkan provider GR
               ),
+              ChangeNotifierProvider(
+                create: (_) => InvoiceProvider(apiService: apiService),
+              ),
             ],
             child: MaterialApp(
               title: 'Purchase Order App',
@@ -96,6 +102,8 @@ class RootApp extends StatelessWidget {
               home: const HomeScreen(),
               routes: {
                 '/create-gr': (context) => const CreateGoodsReceiptScreen(),
+                '/receipt-list': (context) => const GoodsReceiptListScreen(),
+                '/invoice-list': (context) => const InvoiceListScreen(),
               },
             ),
           );

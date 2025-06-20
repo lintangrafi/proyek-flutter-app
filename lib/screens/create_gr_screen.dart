@@ -54,7 +54,14 @@ class _CreateGoodsReceiptScreenState extends State<CreateGoodsReceiptScreen> {
     final grProvider = context.watch<GoodsReceiptProvider>();
     final authProvider = context.read<AuthProvider>();
     final approvedPOs =
-        poProvider.orders.where((po) => po.status == 'Approved').toList();
+        poProvider.orders
+            .where(
+              (po) =>
+                  (po.status.toLowerCase() == 'disetujui' ||
+                      po.status.toLowerCase() == 'approved') &&
+                  !grProvider.goodsReceipts.any((gr) => gr.poId == po.id),
+            )
+            .toList();
     PurchaseOrder? selectedPO =
         _selectedPoId != null
             ? poProvider.orders.firstWhere((po) => po.id == _selectedPoId)
@@ -178,6 +185,7 @@ class _CreateGoodsReceiptScreenState extends State<CreateGoodsReceiptScreen> {
                   final gr = GoodsReceipt(
                     id: 0,
                     poId: selectedPO.id,
+                    grNumber: 'GR-${DateTime.now().millisecondsSinceEpoch}',
                     tanggal: _dateController.text,
                     status: 'Pending',
                     createdBy: authProvider.userId ?? 0,

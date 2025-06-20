@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/purchase_order.dart';
 import '../providers/purchase_order_provider.dart';
 import 'po_detail_screen.dart';
+import 'create_po_screen.dart';
 
 String shortDate(String d) => d.length > 10 ? d.substring(0, 10) : d;
 
@@ -13,41 +14,111 @@ class PurchaseOrderListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final poProvider = Provider.of<PurchaseOrderProvider>(context);
-    final List<PurchaseOrder> allOrders = poProvider.orders;
+    final List<PurchaseOrder> draftOrders =
+        poProvider.orders
+            .where(
+              (po) =>
+                  po.status.toLowerCase() == 'draft' ||
+                  po.status.toLowerCase().contains('menunggu') ||
+                  po.status.toLowerCase().contains('pending'),
+            )
+            .toList();
+    final List<PurchaseOrder> approvedOrders =
+        poProvider.orders
+            .where(
+              (po) =>
+                  po.status.toLowerCase() == 'approved' ||
+                  po.status.toLowerCase().contains('disetujui'),
+            )
+            .toList();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDF4FB),
-      appBar: AppBar(title: const Text('Semua Purchase Order')),
-      body:
-          allOrders.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.list_alt_rounded,
-                      color: Colors.grey[400],
-                      size: 50,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEDF4FB),
+        appBar: AppBar(
+          title: const Text('Daftar Purchase Order'),
+          bottom: const TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorWeight: 3,
+            tabs: [Tab(text: 'Draft'), Tab(text: 'Approved')],
+          ),
+          backgroundColor: Color(0xFF1A4A8B),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      label: 'Draft',
+                      value: draftOrders.length,
+                      color: Colors.orange.shade700,
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Belum ada Purchase Order',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(
+                      label: 'Approved',
+                      value: approvedOrders.length,
+                      color: Colors.green.shade700,
                     ),
-                  ],
-                ),
-              )
-              : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8.0,
-                  horizontal: 10.0,
-                ),
-                itemCount: allOrders.length,
-                itemBuilder: (context, index) {
-                  final po = allOrders[index];
-                  return _POListCardItem(po: po);
-                },
+                  ),
+                ],
               ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  // Draft Tab
+                  draftOrders.isEmpty
+                      ? Center(child: Text('Tidak ada PO Draft'))
+                      : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 10.0,
+                        ),
+                        itemCount: draftOrders.length,
+                        itemBuilder: (context, index) {
+                          final po = draftOrders[index];
+                          return _POListCardItem(po: po);
+                        },
+                      ),
+                  // Approved Tab
+                  approvedOrders.isEmpty
+                      ? Center(child: Text('Tidak ada PO Disetujui'))
+                      : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 10.0,
+                        ),
+                        itemCount: approvedOrders.length,
+                        itemBuilder: (context, index) {
+                          final po = approvedOrders[index];
+                          return _POListCardItem(po: po);
+                        },
+                      ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreatePOScreen()),
+              ),
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text('Buat PO', style: TextStyle(color: Colors.white)),
+          backgroundColor: const Color(0xFF1A4A8B),
+        ),
+      ),
     );
   }
 }
@@ -138,6 +209,44 @@ class _POListCardItem extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// Tambahkan widget statistik card
+class _StatCard extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color color;
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$value',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(fontSize: 14, color: Colors.black87)),
+          ],
+        ),
       ),
     );
   }

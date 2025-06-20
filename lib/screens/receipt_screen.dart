@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:intl/intl.dart';
 import '../models/purchase_order.dart';
 
 class ReceiptScreen extends StatelessWidget {
   final PurchaseOrder po;
   const ReceiptScreen({super.key, required this.po});
+
+  String formatRupiah(num number) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(number);
+  }
 
   Future<pw.Document> _buildPdfReceipt() async {
     final doc = pw.Document();
@@ -96,7 +106,9 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         pw.Padding(
                           padding: pw.EdgeInsets.all(4),
-                          child: pw.Text('Rp${item.price * item.quantity}'),
+                          child: pw.Text(
+                            formatRupiah(item.price * item.quantity),
+                          ),
                         ),
                       ],
                     ),
@@ -107,7 +119,7 @@ class ReceiptScreen extends StatelessWidget {
               pw.Align(
                 alignment: pw.Alignment.centerRight,
                 child: pw.Text(
-                  'Total: Rp${po.total}',
+                  'Total: ' + formatRupiah(po.total),
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: 14,
@@ -243,7 +255,7 @@ class ReceiptScreen extends StatelessWidget {
                           style: TextStyle(fontSize: 14),
                         ),
                         Text(
-                          'Rp${item.price * item.quantity}',
+                          formatRupiah(item.price * item.quantity),
                           style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -262,7 +274,7 @@ class ReceiptScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Rp${po.total}',
+                      formatRupiah(po.total),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 17,

@@ -3,6 +3,7 @@ import 'goods_receipt_item.dart';
 class GoodsReceipt {
   final int id;
   final int poId;
+  final String grNumber;
   final String tanggal;
   final String status;
   final int createdBy;
@@ -11,6 +12,7 @@ class GoodsReceipt {
   GoodsReceipt({
     required this.id,
     required this.poId,
+    required this.grNumber,
     required this.tanggal,
     required this.status,
     required this.createdBy,
@@ -21,6 +23,7 @@ class GoodsReceipt {
     return GoodsReceipt(
       id: json['id'] ?? 0,
       poId: json['po_id'] ?? 0,
+      grNumber: (json['gr_number'] ?? json['grNumber'] ?? '').toString(),
       tanggal: json['tanggal'] ?? '',
       status: json['status'] ?? '',
       createdBy: json['created_by'] ?? 0,
@@ -34,6 +37,7 @@ class GoodsReceipt {
   Map<String, dynamic> toJson() => {
     'id': id,
     'po_id': poId,
+    'gr_number': grNumber,
     'tanggal': tanggal,
     'status': status,
     'created_by': createdBy,
